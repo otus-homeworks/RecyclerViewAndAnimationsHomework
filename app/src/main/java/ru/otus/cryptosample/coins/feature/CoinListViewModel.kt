@@ -38,6 +38,50 @@ class CoinListViewModel(
         updateUiState()
     }
 
+    fun addRandomCoin() {
+        if (fullCategories.isEmpty()) return
+
+        val allCoins = fullCategories.flatMap { it.coins }
+        if (allCoins.isEmpty()) return
+
+        val templateCoin = allCoins.random()
+
+        val newCoinId = "new_${System.currentTimeMillis()}"
+        val newCoin = templateCoin.copy(
+            id = newCoinId,
+            name = "New Coin ${(1..100).random()}",
+            price = "$${(1000..50000).random()}",
+        )
+
+        val randomCategory = fullCategories.random()
+
+        fullCategories = fullCategories.map { category ->
+            if (category.id == randomCategory.id) {
+                category.copy(coins = category.coins + newCoin)
+            } else {
+                category
+            }
+        }
+        updateUiState()
+    }
+
+    fun removeRandomCoin() {
+        if (fullCategories.isEmpty()) return
+
+        val allCoins = fullCategories.flatMap { it.coins }
+        if (allCoins.isEmpty()) return
+
+        val coinsToRemove = allCoins.shuffled().take(5.coerceAtMost(allCoins.size))
+        val coinsToRemoveIds = coinsToRemove.map { it.id }.toSet()
+
+        fullCategories = fullCategories.map { category ->
+            category.copy(
+                coins = category.coins.filter { coin -> coin.id !in coinsToRemoveIds }
+            )
+        }
+        updateUiState()
+    }
+
     private fun requestCoins() {
         consumeCoinsUseCase().map { categories ->
             categories.map { category -> coinsStateFactory.create(category) }
@@ -54,20 +98,20 @@ class CoinListViewModel(
     }
 
     private fun updateUiState() {
-        var processedCategories = if (showAll) {
-            fullCategories
-        } else {
-            fullCategories.map { category ->
-                category.copy(coins = category.coins.take(4))
-            }
-        }
+        var processedCategories = fullCategories
 
         processedCategories = processedCategories.map { category ->
-            category.copy(coins = category.coins.map { coin ->
-                coin.copy(highlight = highlightMovers && coin.isHotMover)
-            })
+            category.copy(
+                coins = category.coins.map { coin ->
+                    coin.copy(highlight = highlightMovers && coin.isHotMover)
+                })
         }
 
-        _state.update { it.copy(categories = processedCategories) }
+        _state.update {
+            it.copy(
+                categories = processedCategories,
+                showAll = showAll
+            )
+        }
     }
 }

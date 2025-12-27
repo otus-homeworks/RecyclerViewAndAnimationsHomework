@@ -12,6 +12,10 @@ class CoinViewHolder(
     private val binding: ItemCoinBinding
 ) : RecyclerView.ViewHolder(binding.root) {
 
+    sealed class Payload {
+        data class HighlightChanged(val isHighlighted: Boolean) : Payload()
+    }
+
     fun bind(coin: CoinState) {
         with(binding) {
             coinName.text = coin.name
@@ -31,6 +35,21 @@ class CoinViewHolder(
             }
 
             fireBadge.isVisible = coin.highlight
+        }
+    }
+
+    fun bind(coin: CoinState, payloads: List<Any>) {
+        if (payloads.isEmpty()) {
+            bind(coin)
+            return
+        }
+
+        payloads.forEach { payload ->
+            when (payload) {
+                is Payload.HighlightChanged -> {
+                    binding.fireBadge.isVisible = payload.isHighlighted
+                }
+            }
         }
     }
 }

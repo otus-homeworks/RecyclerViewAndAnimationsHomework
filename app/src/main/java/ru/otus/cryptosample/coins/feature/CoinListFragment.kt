@@ -11,12 +11,15 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import ru.otus.cryptosample.CoinsSampleApp
 import ru.otus.cryptosample.coins.feature.adapter.CoinsAdapter
 import ru.otus.cryptosample.coins.feature.di.DaggerCoinListComponent
 import ru.otus.cryptosample.databinding.FragmentCoinListBinding
 import javax.inject.Inject
+import ru.otus.cryptosample.R
+import ru.otus.cryptosample.coins.feature.adapter.CoinItemAnimator
 
 class CoinListFragment : Fragment() {
 
@@ -59,14 +62,15 @@ class CoinListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        coinsAdapter = CoinsAdapter()
+        coinsAdapter = CoinsAdapter(RecyclerView.RecycledViewPool())
 
         val gridLayoutManager = GridLayoutManager(requireContext(), 2)
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when (coinsAdapter.getItemViewType(position)) {
-                    0 -> 2 // Category header spans full width
-                    1 -> 1 // Coin item spans half width
+                    R.layout.item_category_header -> 2 // Category header spans full width
+                    R.layout.item_coin -> 1 // Coin item spans half-width
+                    R.layout.item_carousel -> 2 // The horizontal row spans full width
                     else -> 1
                 }
             }
@@ -75,6 +79,15 @@ class CoinListFragment : Fragment() {
         binding.recyclerView.apply {
             layoutManager = gridLayoutManager
             adapter = coinsAdapter
+            itemAnimator = CoinItemAnimator()
+        }
+
+        binding.btnAddCoin.setOnClickListener {
+            viewModel.addRandomCoin()
+        }
+
+        binding.btnRemoveCoins.setOnClickListener {
+            viewModel.removeRandomCoin()
         }
     }
 
@@ -99,7 +112,7 @@ class CoinListFragment : Fragment() {
     }
 
     private fun renderState(state: CoinsScreenState) {
-        coinsAdapter.setData(state.categories)
+        coinsAdapter.setData(state.categories, state.showAll)
     }
 
     override fun onDestroyView() {
