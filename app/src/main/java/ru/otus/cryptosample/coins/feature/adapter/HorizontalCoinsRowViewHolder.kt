@@ -6,7 +6,7 @@ import ru.otus.cryptosample.coins.feature.CoinState
 import ru.otus.cryptosample.databinding.ItemCarouselBinding
 
 class HorizontalCoinsRowViewHolder(
-    private val binding: ItemCarouselBinding,
+    binding: ItemCarouselBinding,
     sharedPool: RecyclerView.RecycledViewPool
 ) : RecyclerView.ViewHolder(binding.root) {
 
@@ -21,6 +21,6 @@ class HorizontalCoinsRowViewHolder(
     }
 
     fun bind(coins: List<CoinState>) {
-        adapter.submitData(coins)
+        adapter.submitList(coins)
     }
 }

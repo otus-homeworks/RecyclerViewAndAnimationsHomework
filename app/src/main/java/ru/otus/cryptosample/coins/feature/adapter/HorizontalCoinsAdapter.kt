@@ -2,22 +2,27 @@ package ru.otus.cryptosample.coins.feature.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import kotlin.math.roundToInt
 import ru.otus.cryptosample.coins.feature.CoinState
 import ru.otus.cryptosample.databinding.ItemCoinBinding
 
-class HorizontalCoinsAdapter : RecyclerView.Adapter<CoinViewHolder>() {
+class HorizontalCoinsAdapter : ListAdapter<CoinState, CoinViewHolder>(DIFF_CALLBACK) {
 
     companion object {
         private const val VISIBLE_ITEMS_COUNT = 2.25f
-    }
 
-    private var items: List<CoinState> = emptyList()
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<CoinState>() {
+            override fun areItemsTheSame(oldItem: CoinState, newItem: CoinState): Boolean {
+                return oldItem.id == newItem.id
+            }
 
-    fun submitData(newItems: List<CoinState>) {
-        items = newItems
-        notifyDataSetChanged()
+            override fun areContentsTheSame(oldItem: CoinState, newItem: CoinState): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CoinViewHolder {
@@ -42,12 +47,9 @@ class HorizontalCoinsAdapter : RecyclerView.Adapter<CoinViewHolder>() {
         binding.root.layoutParams = lp
 
         return CoinViewHolder(binding)
-
     }
 
     override fun onBindViewHolder(holder: CoinViewHolder, position: Int) {
-        holder.bind(items[position])
+        holder.bind(getItem(position))
     }
-
-    override fun getItemCount(): Int = items.size
 }

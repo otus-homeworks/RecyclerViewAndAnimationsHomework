@@ -2,6 +2,8 @@ package ru.otus.cryptosample.coins.feature.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import ru.otus.cryptosample.coins.feature.CoinCategoryState
 import ru.otus.cryptosample.databinding.ItemCarouselBinding
@@ -16,15 +18,39 @@ class CoinsAdapter(
         private const val VIEW_TYPE_CATEGORY = 0
         private const val VIEW_TYPE_COIN = 1
         private const val VIEW_TYPE_HORIZONTAL_ROW = 2
+
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<CoinsAdapterItem>() {
+            override fun areItemsTheSame(
+                oldItem: CoinsAdapterItem,
+                newItem: CoinsAdapterItem
+            ): Boolean {
+                return when {
+                    oldItem is CoinsAdapterItem.CategoryHeader && newItem is CoinsAdapterItem.CategoryHeader ->
+                        oldItem.categoryName == newItem.categoryName
+
+                    oldItem is CoinsAdapterItem.CoinItem && newItem is CoinsAdapterItem.CoinItem ->
+                        oldItem.coin.id == newItem.coin.id
+
+                    oldItem is CoinsAdapterItem.HorizontalCoinsRow && newItem is CoinsAdapterItem.HorizontalCoinsRow ->
+                        oldItem.categoryName == newItem.categoryName
+
+                    else -> false
+                }
+            }
+
+            override fun areContentsTheSame(
+                oldItem: CoinsAdapterItem,
+                newItem: CoinsAdapterItem
+            ): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 
-    private var items = listOf<CoinsAdapterItem>()
-
-//    private var showAll: Boolean = true
+    private val differ = AsyncListDiffer(this, DIFF_CALLBACK)
 
     fun setData(categories: List<CoinCategoryState>, showAll: Boolean) {
         val adapterItems = mutableListOf<CoinsAdapterItem>()
-
 
         categories.forEach { category ->
             adapterItems.add(CoinsAdapterItem.CategoryHeader(category.name))
@@ -46,14 +72,13 @@ class CoinsAdapter(
             }
         }
 
-        items = adapterItems
-        notifyDataSetChanged()
+        differ.submitList(adapterItems)
     }
 
-    override fun getItemCount(): Int = items.size
+    override fun getItemCount(): Int = differ.currentList.size
 
     override fun getItemViewType(position: Int): Int {
-        return when (items[position]) {
+        return when (differ.currentList[position]) {
             is CoinsAdapterItem.CategoryHeader -> VIEW_TYPE_CATEGORY
             is CoinsAdapterItem.CoinItem -> VIEW_TYPE_COIN
             is CoinsAdapterItem.HorizontalCoinsRow -> VIEW_TYPE_HORIZONTAL_ROW
@@ -89,16 +114,16 @@ class CoinsAdapter(
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (val item = items[position]) {
+        when (val item = differ.currentList[position]) {
             is CoinsAdapterItem.CategoryHeader -> {
                 (holder as CategoryHeaderViewHolder).bind(item.categoryName)
             }
             is CoinsAdapterItem.CoinItem -> {
                 (holder as CoinViewHolder).bind(item.coin)
             }
-
-            is CoinsAdapterItem.HorizontalCoinsRow ->
+            is CoinsAdapterItem.HorizontalCoinsRow -> {
                 (holder as HorizontalCoinsRowViewHolder).bind(item.coins)
+            }
         }
     }
 }
