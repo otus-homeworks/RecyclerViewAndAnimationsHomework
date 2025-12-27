@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.launch
 import ru.otus.cryptosample.CoinsSampleApp
 import ru.otus.cryptosample.coins.feature.adapter.CoinsAdapter
@@ -59,14 +60,15 @@ class CoinListFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        coinsAdapter = CoinsAdapter()
+        coinsAdapter = CoinsAdapter(RecyclerView.RecycledViewPool())
 
         val gridLayoutManager = GridLayoutManager(requireContext(), 2)
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when (coinsAdapter.getItemViewType(position)) {
                     0 -> 2 // Category header spans full width
-                    1 -> 1 // Coin item spans half width
+                    1 -> 1 // Coin item spans half-width
+                    2 -> 2 // The horizontal row spans full width
                     else -> 1
                 }
             }
@@ -99,7 +101,7 @@ class CoinListFragment : Fragment() {
     }
 
     private fun renderState(state: CoinsScreenState) {
-        coinsAdapter.setData(state.categories)
+        coinsAdapter.setData(state.categories, state.showAll)
     }
 
     override fun onDestroyView() {
