@@ -1,10 +1,10 @@
 package ru.otus.cryptosample.coins.feature.adapter
 
-import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.AsyncListDiffer
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import ru.otus.cryptosample.R
 import ru.otus.cryptosample.coins.feature.CoinCategoryState
 import ru.otus.cryptosample.databinding.ItemCarouselBinding
 import ru.otus.cryptosample.databinding.ItemCategoryHeaderBinding
@@ -15,10 +15,6 @@ class CoinsAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
-        private const val VIEW_TYPE_CATEGORY = 0
-        private const val VIEW_TYPE_COIN = 1
-        private const val VIEW_TYPE_HORIZONTAL_ROW = 2
-
         private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<CoinsAdapterItem>() {
             override fun areItemsTheSame(
                 oldItem: CoinsAdapterItem,
@@ -94,34 +90,22 @@ class CoinsAdapter(
 
     override fun getItemViewType(position: Int): Int {
         return when (differ.currentList[position]) {
-            is CoinsAdapterItem.CategoryHeader -> VIEW_TYPE_CATEGORY
-            is CoinsAdapterItem.CoinItem -> VIEW_TYPE_COIN
-            is CoinsAdapterItem.HorizontalCoinsRow -> VIEW_TYPE_HORIZONTAL_ROW
+            is CoinsAdapterItem.CategoryHeader -> R.layout.item_category_header
+            is CoinsAdapterItem.CoinItem -> R.layout.item_coin
+            is CoinsAdapterItem.HorizontalCoinsRow -> R.layout.item_carousel
         }
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            VIEW_TYPE_CATEGORY -> CategoryHeaderViewHolder(
-                ItemCategoryHeaderBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
+            R.layout.item_category_header -> CategoryHeaderViewHolder(
+                parent.inflateBinding(ItemCategoryHeaderBinding::inflate)
             )
-            VIEW_TYPE_COIN -> CoinViewHolder(
-                ItemCoinBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                )
+            R.layout.item_coin -> CoinViewHolder(
+                parent.inflateBinding(ItemCoinBinding::inflate)
             )
-            VIEW_TYPE_HORIZONTAL_ROW -> HorizontalCoinsRowViewHolder(
-                ItemCarouselBinding.inflate(
-                    LayoutInflater.from(parent.context),
-                    parent,
-                    false
-                ),
+            R.layout.item_carousel -> HorizontalCoinsRowViewHolder(
+                parent.inflateBinding(ItemCarouselBinding::inflate),
                 sharedPool
             )
             else -> throw IllegalArgumentException("Unknown view type: $viewType")

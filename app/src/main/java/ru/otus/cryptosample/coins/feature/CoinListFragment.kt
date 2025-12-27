@@ -18,6 +18,7 @@ import ru.otus.cryptosample.coins.feature.adapter.CoinsAdapter
 import ru.otus.cryptosample.coins.feature.di.DaggerCoinListComponent
 import ru.otus.cryptosample.databinding.FragmentCoinListBinding
 import javax.inject.Inject
+import ru.otus.cryptosample.R
 import ru.otus.cryptosample.coins.feature.adapter.CoinItemAnimator
 
 class CoinListFragment : Fragment() {
@@ -67,9 +68,9 @@ class CoinListFragment : Fragment() {
         gridLayoutManager.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
             override fun getSpanSize(position: Int): Int {
                 return when (coinsAdapter.getItemViewType(position)) {
-                    0 -> 2 // Category header spans full width
-                    1 -> 1 // Coin item spans half-width
-                    2 -> 2 // The horizontal row spans full width
+                    R.layout.item_category_header -> 2 // Category header spans full width
+                    R.layout.item_coin -> 1 // Coin item spans half-width
+                    R.layout.item_carousel -> 2 // The horizontal row spans full width
                     else -> 1
                 }
             }
