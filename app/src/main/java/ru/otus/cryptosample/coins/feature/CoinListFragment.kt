@@ -18,6 +18,7 @@ import ru.otus.cryptosample.coins.feature.adapter.CoinsAdapter
 import ru.otus.cryptosample.coins.feature.di.DaggerCoinListComponent
 import ru.otus.cryptosample.databinding.FragmentCoinListBinding
 import javax.inject.Inject
+import ru.otus.cryptosample.coins.feature.adapter.CoinItemAnimator
 
 class CoinListFragment : Fragment() {
 
@@ -77,6 +78,15 @@ class CoinListFragment : Fragment() {
         binding.recyclerView.apply {
             layoutManager = gridLayoutManager
             adapter = coinsAdapter
+            itemAnimator = CoinItemAnimator()
+        }
+
+        binding.btnAddCoin.setOnClickListener {
+            viewModel.addRandomCoin()
+        }
+
+        binding.btnRemoveCoins.setOnClickListener {
+            viewModel.removeRandomCoin()
         }
     }
 

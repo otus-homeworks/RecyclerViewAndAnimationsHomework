@@ -5,4 +5,6 @@
     <string name="coins">Coins</string>
     <string name="highlight_movers">Highlight movers</string>
     <string name="show_all">Show All</string>
+    <string name="add_coin">Add Coin</string>
+    <string name="remove_coins">Remove Coins</string>
 </resources>
