@@ -24,14 +24,14 @@ class CoinsAdapter(
                 oldItem: CoinsAdapterItem,
                 newItem: CoinsAdapterItem
             ): Boolean {
-                return when {
-                    oldItem is CoinsAdapterItem.CategoryHeader && newItem is CoinsAdapterItem.CategoryHeader ->
+                return when (oldItem) {
+                    is CoinsAdapterItem.CategoryHeader if newItem is CoinsAdapterItem.CategoryHeader ->
                         oldItem.categoryName == newItem.categoryName
 
-                    oldItem is CoinsAdapterItem.CoinItem && newItem is CoinsAdapterItem.CoinItem ->
+                    is CoinsAdapterItem.CoinItem if newItem is CoinsAdapterItem.CoinItem ->
                         oldItem.coin.id == newItem.coin.id
 
-                    oldItem is CoinsAdapterItem.HorizontalCoinsRow && newItem is CoinsAdapterItem.HorizontalCoinsRow ->
+                    is CoinsAdapterItem.HorizontalCoinsRow if newItem is CoinsAdapterItem.HorizontalCoinsRow ->
                         oldItem.categoryName == newItem.categoryName
 
                     else -> false
@@ -43,6 +43,21 @@ class CoinsAdapter(
                 newItem: CoinsAdapterItem
             ): Boolean {
                 return oldItem == newItem
+            }
+
+            override fun getChangePayload(
+                oldItem: CoinsAdapterItem,
+                newItem: CoinsAdapterItem
+            ): Any? {
+                if (oldItem is CoinsAdapterItem.CoinItem && newItem is CoinsAdapterItem.CoinItem) {
+                    val oldCoin = oldItem.coin
+                    val newCoin = newItem.coin
+                    if (oldCoin.highlight != newCoin.highlight &&
+                        oldCoin.copy(highlight = newCoin.highlight) == newCoin) {
+                        return CoinViewHolder.Payload.HighlightChanged(newCoin.highlight)
+                    }
+                }
+                return null
             }
         }
     }
@@ -123,6 +138,23 @@ class CoinsAdapter(
             }
             is CoinsAdapterItem.HorizontalCoinsRow -> {
                 (holder as HorizontalCoinsRowViewHolder).bind(item.coins)
+            }
+        }
+    }
+
+    override fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        position: Int,
+        payloads: MutableList<Any>
+    ) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            when (val item = differ.currentList[position]) {
+                is CoinsAdapterItem.CoinItem -> {
+                    (holder as CoinViewHolder).bind(item.coin, payloads)
+                }
+                else -> super.onBindViewHolder(holder, position, payloads)
             }
         }
     }

@@ -22,6 +22,15 @@ class HorizontalCoinsAdapter : ListAdapter<CoinState, CoinViewHolder>(DIFF_CALLB
             override fun areContentsTheSame(oldItem: CoinState, newItem: CoinState): Boolean {
                 return oldItem == newItem
             }
+
+            override fun getChangePayload(oldItem: CoinState, newItem: CoinState): Any? {
+                return if (oldItem.highlight != newItem.highlight &&
+                           oldItem.copy(highlight = newItem.highlight) == newItem) {
+                    CoinViewHolder.Payload.HighlightChanged(newItem.highlight)
+                } else {
+                    null
+                }
+            }
         }
     }
 
@@ -51,5 +60,13 @@ class HorizontalCoinsAdapter : ListAdapter<CoinState, CoinViewHolder>(DIFF_CALLB
 
     override fun onBindViewHolder(holder: CoinViewHolder, position: Int) {
         holder.bind(getItem(position))
+    }
+
+    override fun onBindViewHolder(holder: CoinViewHolder, position: Int, payloads: MutableList<Any>) {
+        if (payloads.isEmpty()) {
+            super.onBindViewHolder(holder, position, payloads)
+        } else {
+            holder.bind(getItem(position), payloads)
+        }
     }
 }
